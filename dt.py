@@ -4,6 +4,7 @@ cuts_for_root = []
 count_leaf_nodes = 0
 count_internal_nodes = 0
 
+# node class - both leaf and internal
 class Node():
     def __init__(self, feature=None, threshold=None, left=None, right=None, info_gain=None, gain_ratio=None, label=None):
 
@@ -18,18 +19,22 @@ class Node():
         # for leaf
         self.label = label
 
+# tree class
 class DecisionTree():
     def __init__(self):
         self.root_node = None
         self.count_leaf_nodes = 0
         self.count_internal_nodes = 0
 
-
+    # make subtrees recursively
     def MakeSubTree(self, dataset, depth=0):
         current_depth = depth
         X, Y = dataset[:, :-1], dataset[:, -1]
+
+        # get stopping condition
         candidate_splits, stop = self.get_candidate_splits(dataset)
 
+        # if stopping, create leaf node
         if stop:
             y = list(Y)
             leaf_label = max(set(y), key = y.count)
@@ -37,18 +42,21 @@ class DecisionTree():
             self.count_leaf_nodes += 1
             return Node(label=leaf_label) 
         
+        # otherwise create internal node
         else:
             best_split = self.get_best_split(dataset, candidate_splits)
             if depth == 0:
                 # print("candidate cuts and info gain", cuts_for_root)
                 pass
+
+            # recursively subtree creation
             left_subtree = self.MakeSubTree(best_split["left_tree_data"], current_depth+1)
             right_subtree = self.MakeSubTree(best_split["right_tree_data"], current_depth+1)
             self.count_internal_nodes += 1
             return Node(best_split["feature"], best_split["threshold"], left_subtree, right_subtree, best_split["info_gain"], best_split["gain_ratio"]) 
         
-        
     def get_candidate_splits(self, dataset):
+        # function to get candidate splits and check stopping conditions
         stop = False
         splits = []
         for j in range(dataset.shape[1]-1):
@@ -66,8 +74,9 @@ class DecisionTree():
             return splits, stop
         return splits, stop
         
-            
+    
     def get_best_split(self, dataset, candidate_splits):
+        # finding best split among candidates
         best_split = {}
         max_gain_ratio = -1
 
@@ -97,25 +106,29 @@ class DecisionTree():
 
         return best_split
 
-
+    
     def split_data(self, dataset, j, c):
+        # splitting dataset for the subtrees
         left = np.array([data for data in dataset if data[j]>=c])
         right = np.array([data for data in dataset if data[j]<c])
         return left, right
         pass
     
     def get_split_entropy(self, node, left, right):
+        # split entropy calculation for gain ratio
         p_left = len(left)/len(node)
         p_right = len(right)/len(node)
         return (-p_left * np.log2(p_left)) + (-p_right * np.log2(p_right))
 
     def get_info_gain(self, node, left, right):
+        # information gain
         p_left = len(left)/len(node)
         p_right = len(right)/len(node)
         info_gain = self.entropy(node) - (p_left*self.entropy(left) + p_right*self.entropy(right))
         return info_gain
     
     def entropy(self, l):
+        # Shannon entropy
         labels = np.unique(l)
         ent = 0
         for y in labels:

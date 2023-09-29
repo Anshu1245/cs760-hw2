@@ -10,20 +10,25 @@ train_size = 100
 test_size = 25
 gaussian = 1
 
+# create data
 data_x = np.random.uniform(low=a, high=b, size=train_size+test_size)
 data_y = np.sin(data_x)
 
+# split into train and test
 train_x, train_y = data_x[:train_size], data_y[:train_size]
 test_x, test_y = data_x[train_size:], data_y[train_size:]
 
+# fit polynomial
 lagrange_polynomial = lagrange(train_x, train_y)
 
+# calculate errors (MAE)
 training_error = np.mean(np.abs(lagrange_polynomial(train_x)-train_y))
 testing_error = np.mean(np.abs(lagrange_polynomial(test_x)-test_y))
 print("training err", training_error)
 print("testing err", testing_error)
 
 
+# for the added Gaussian noise
 if gaussian:
     stddev = [0.01, 0.05, 0.1, 0.5, 1]
     train_err, test_err = [], []
@@ -43,6 +48,7 @@ if gaussian:
         testing_error = np.mean(np.abs(lagrange_polynomial(test_x)-test_y))
         test_err.append(testing_error)
 
+    # plotting
     plt.plot(stddev, train_err, label='train')
     plt.plot(stddev, test_err, label='test')
     plt.legend()

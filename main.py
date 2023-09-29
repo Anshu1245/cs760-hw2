@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 
 np.random.seed(1000)
 
+
 def countFreq(arr, n):
+    # function to get frequency of unique labels in the data
     visited = [False for i in range(n)]
 
     for i in range(n):
@@ -20,6 +22,7 @@ def countFreq(arr, n):
         print(arr[i], count)
 
 def print_tree(classifier, indent=" "):        
+        # printing a decision tree
         tree = classifier
 
         if tree.label is not None:
@@ -33,6 +36,7 @@ def print_tree(classifier, indent=" "):
             print_tree(tree.right_child, indent + indent)
 
 def predict(x, dt):
+    # predicting using a decision tree
     if dt.label!=None: return dt.label
     value = x[dt.j]
     if value>=dt.c:
@@ -42,6 +46,7 @@ def predict(x, dt):
 
 
 def get_test_error(test_X, test_Y, dt):
+    # testing error
     error = 0
     for i in range(len(test_X)):
         y = predict(test_X[i], dt)
@@ -70,13 +75,18 @@ countFreq(dataset[:, -1], dataset.shape[0])
 if dbig:
     test_error = []
     num_nodes = []
+
+    # randomly shuffle data
     np.random.shuffle(dataset)
+    
+    # create the datasets
     d8192, test = dataset[:8192, :], dataset[8192:, :]
     d32 = d8192[:32, :]
     d128 = d8192[:128, :]
     d512 = d8192[:512, :]
     d2048 = d8192[:2048, :]
 
+    
     for dataset in [d32, d128, d512, d2048, d8192]:
         classifier = DecisionTree()
         classifier.root_node = classifier.MakeSubTree(dataset)
@@ -85,6 +95,7 @@ if dbig:
         print("test error", test_error)
         print("# nodes", num_nodes)
 
+    # plotting
     plt.plot([32, 128, 512, 2048, 8192], test_error)
     plt.xlabel("n")
     plt.ylabel("test error")
@@ -92,12 +103,13 @@ if dbig:
 
 
 else:
+    # for datasets other than Dbig.txt
     classifier = DecisionTree()
     classifier.root_node = classifier.MakeSubTree(dataset)
     print_tree(classifier.root_node)
 
 
-
+# scatter plot for dataset
 # plt.scatter(dataset[:, 0], dataset[:, 1], c=dataset[:, -1], label=dataset[:, -1])
 # # plt.axhline(y=0.201829, color='r')
 # plt.xlabel("X0")
